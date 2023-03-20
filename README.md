@@ -1,27 +1,103 @@
-# POCI18NTRANSLATE
+# ANGULAR TRANSLATE MULTIPLE LANGUAGE
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.1.1.
+1.  `git clone https://github.com/chaiyarin/i18n-angular-example.git`
+2.  `npm install`
+3.  โดยใน angular นี้ ได้ติดตั้ง package 2 package สำหรับการแปลภาษา
+    - npm install @ngx-translate/core --save
+    - npm install @ngx-translate/http-loader --save
+4.  วิธีการ Setup ให้ไปที่ File : app.module.ts และ Setup ตาม Source Code ด้านล่าง
 
-## Development server
+```typescript
+import { NgModule } from "@angular/core";
+import { BrowserModule } from "@angular/platform-browser";
+import { HttpClientModule, HttpClient } from "@angular/common/http";
+import { AppRoutingModule } from "./app-routing.module";
+import { AppComponent } from "./app.component";
+import { TranslateLoader, TranslateModule } from "@ngx-translate/core";
+import { TranslateHttpLoader } from "@ngx-translate/http-loader";
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http);
+}
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient],
+      },
+    }),
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
 
-## Code scaffolding
+5.  สร้าง Folder ชื่อ i18n ภายใน Folder: assets
+6.  สร้างไฟล์ชื่อ en.json แล้วใส่เนื้อหาตามตัวอย่างด้านล่าง
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```json
+{
+  "FIRSTNAME": "Chaiyarin",
+  "LASTNAME": "Niamsuwan",
+  "HELLO_TITLE_PARAM": "Hello {{school}}!"
+}
+```
 
-## Build
+7.  สร้างไฟล์ชื่อ th.json แล้วใส่เนื้อหาตามตัวอย่างด้านล่าง
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```json
+{
+  "FIRSTNAME": "ชัยรินทร์",
+  "LASTNAME": "เนียมสุวรรณ",
+  "HELLO_TITLE_PARAM": "สวัสดี {{school}}!"
+}
+```
 
-## Running unit tests
+8.  ไปที่ Component ที่เราต้องการจะ Display ภาษา ณ ที่นี้คือ `app.component.html` ใช้ | (pipe) ในการเรียก Lib เพื่อ Translate
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```html
+<select (change)="switchLanguage($event)">
+  <option value="en">English</option>
+  <option value="th">Thailand</option>
+</select>
 
-## Running end-to-end tests
+<p>{{ 'FIRSTNAME' | translate }}</p>
+<p>{{ 'HELLO_TITLE_PARAM' | translate:{school: 'เตรียมอุดม'} }}</p>
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+9.  ไปสร้าง Function สำหรับเปลี่ยนภาษา ชื่อเดียวกันกับใน `app.component.html` ชื่อว่า `switchLanguage($event)` ที่ไฟล์ `app.component.ts`
 
-## Further help
+```typescript
+import { Component } from "@angular/core";
+import { TranslateService } from "@ngx-translate/core";
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
+})
+export class AppComponent {
+  title = "POC_I18N_TRANSLATE";
+
+  constructor(private translate: TranslateService) {
+    translate.setDefaultLang("en");
+  }
+
+  switchLanguage(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    this.translate.use(value);
+  }
+}
+```
+
+10. Start Angular Project ด้วยคำสั่ง `ng server` เป็นอันจบพิธี
+
+![Angular Translate](assets/angular-translate.gif)
